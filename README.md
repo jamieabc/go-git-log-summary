@@ -7,7 +7,7 @@ At root of repository, type following commands to unpack git objects:
 ```shell script
 git gc
 mv .git/objects/pack .
-git unpack-objects < pack/*
+git unpack-objects < pack/*.pack
 rm -rf pack
 ```
 
