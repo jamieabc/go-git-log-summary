@@ -5,9 +5,11 @@ import (
 	"fmt"
 	"os"
 	"path"
-	"sort"
 	"strconv"
 	"strings"
+	"time"
+
+	"github.com/jamieabc/go-git-log-summary/internal/analyzer"
 
 	"github.com/jamieabc/go-git-log-summary/pkg/git_logs"
 )
@@ -29,22 +31,7 @@ func init() {
 }
 
 type stat struct {
-	data map[string][]int
-}
-
-func (s stat) String() string {
-	var sb strings.Builder
-
-	keys := make([]string, 0)
-	for v := range s.data {
-		keys = append(keys, v)
-	}
-	sort.Strings(keys)
-	for _, k := range keys {
-		sb.WriteString(fmt.Sprintf("%s\ttotal %d\t(%v)\n", k, len(s.data[k]), s.data[k]))
-	}
-
-	return sb.String()
+	data map[time.Time][]int
 }
 
 func main() {
@@ -55,21 +42,31 @@ func main() {
 	}
 
 	result := stat{
-		data: make(map[string][]int),
+		data: make(map[time.Time][]int),
 	}
 
 	for _, l := range logs {
 		if count, nums := extractNumber(l.Message); count > 0 {
-			t := l.Date.Format("2006-Jan-2")
-			if _, ok := result.data[t]; !ok {
-				result.data[t] = nums
+			if _, ok := result.data[l.Date]; !ok {
+				result.data[l.Date] = nums
 			} else {
-				result.data[t] = append(result.data[t], nums...)
+				result.data[l.Date] = append(result.data[l.Date], nums...)
 			}
 		}
 	}
 
-	fmt.Println(result)
+	a := analyzer.NewAnalyzer(result.data)
+	analyzed := a.Analyze()
+
+	fmt.Printf("monthly\n")
+	for k, v := range analyzed["monthly"] {
+		fmt.Printf("\t%s: total %d (%v)\n\n", k, len(v), v)
+	}
+
+	fmt.Printf("daily\n")
+	for k, v := range analyzed["daily"] {
+		fmt.Printf("\t%s: total %d (%v)\n\n", k, len(v), v)
+	}
 }
 
 func extractNumber(str string) (int, []int) {
