@@ -11,6 +11,9 @@ git unpack-objects < pack/*.pack
 rm -rf pack
 ```
 
+Usage: `log-summary -p path`
+path is absolute path to repository.
+
 reference about git internals
 1. [git object model](http://shafiul.github.io/gitbook/1_the_git_object_model.html)
 1. [git internals](https://git-scm.com/book/id/v2/Git-Internals-Git-Objects)
