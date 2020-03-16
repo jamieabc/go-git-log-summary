@@ -9,6 +9,7 @@ git gc
 mv .git/objects/pack .
 git unpack-objects < pack/*.pack
 rm -rf pack
+echo $(git rev-parse master) > .git/refs/heads/master
 ```
 
 Usage: `log-summary -p path`
